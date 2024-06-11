@@ -4,7 +4,7 @@ import datetime
 from dotenv import load_dotenv
 import os
 import pytz
-from models import ScoreEntry, ScoreResponse
+from models import ScoreResponse
 
 load_dotenv()
 
@@ -23,10 +23,12 @@ class Database:
 
 db = Database()
 
+
 async def authorize(api_key: str = Header(None)):
     if api_key != os.getenv("APIKEY"):
         raise HTTPException(status_code=401, detail="Unauthorized")
     return True
+
 
 @app.on_event("startup")
 async def startup():
@@ -39,7 +41,11 @@ async def shutdown():
 
 
 @app.post("/leaderboard", response_model=ScoreResponse)
-async def add_score(username: str = Query(...), score: int = Query(...), authorized: bool = Depends(authorize)):
+async def add_score(
+    username: str = Query(...),
+    score: int = Query(...),
+    authorized: bool = Depends(authorize),
+):
     query = """
     INSERT INTO leaderboard (username, score, timestamp)
     VALUES ($1, $2, $3)
@@ -55,7 +61,9 @@ async def add_score(username: str = Query(...), score: int = Query(...), authori
 
 
 @app.get("/leaderboard/top", response_model=list[ScoreResponse])
-async def get_top_leaderboard(limit: int = Query(10, ge=1), authorized: bool = Depends(authorize)):
+async def get_top_leaderboard(
+    limit: int = Query(10, ge=1), authorized: bool = Depends(authorize)
+):
     query = """
     SELECT id, username, score, timestamp
     FROM leaderboard
