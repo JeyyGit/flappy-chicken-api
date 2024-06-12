@@ -8,7 +8,7 @@ from models import ScoreResponse
 
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(title="Flappy Chicken API")
 
 
 class Database:
